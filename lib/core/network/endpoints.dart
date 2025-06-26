@@ -15,4 +15,10 @@ class Endpoints {
   static const String forgetPassword = '$baseUrl/auth/forget-password';
   static const String resetPassword = '$baseUrl/auth/reset-password';
   static const String changePassword = '$baseUrl/auth/change-password';
+
+  // bin endpoints
+  static const String getBins = '$baseUrl/bins';
+  static const String addBin = '$baseUrl/bins/add';
+  static const String updateBin = '$baseUrl/bins/update';
+  static const String updateBinColor = '$baseUrl/bins';
 }

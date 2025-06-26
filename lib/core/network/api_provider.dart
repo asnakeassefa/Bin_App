@@ -54,7 +54,6 @@ class ApiService {
               final retryResponse = await _retryRequest(error.requestOptions);
               handler.resolve(retryResponse);
             } catch (e) {
-              log('Token refresh failed: ${e.toString()}');
               handler.next(
                 DioException(
                   requestOptions: error.requestOptions,
@@ -92,7 +91,7 @@ class ApiService {
       }
 
       final response = await _dio.post(
-        '${Endpoints.baseUrl}/auth/refresh',
+        '${Endpoints.baseUrl}/auth/refresh-token',
         data: {"refreshToken": refreshToken},
       );
 

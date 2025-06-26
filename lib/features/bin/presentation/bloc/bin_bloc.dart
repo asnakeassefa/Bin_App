@@ -53,7 +53,6 @@ class BinBloc extends Cubit<BinState> {
     try {
       final message = await repository.updateBinColor(binId, colors);
       emit(BinUpdated(message));
-      getBins(); // Refresh the list after updating color
     } catch (e) {
       emit(BinError(e.toString()));
     }

@@ -1,4 +1,3 @@
-import 'package:bin_app/core/theme/custom_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
@@ -6,11 +5,13 @@ class DetailCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color shade;
+  final Function onPress;
   const DetailCard({
     super.key,
     required this.title,
     required this.subtitle,
     required this.shade,
+    required this.onPress,
   });
 
   @override
@@ -42,6 +43,9 @@ class DetailCard extends StatelessWidget {
           child: const Icon(Ionicons.time_outline),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        onTap: () {
+          onPress();
+        },
         title: Text(
           title,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

@@ -1,5 +1,10 @@
+import 'dart:developer';
+
+import 'package:bin_app/core/error/exceptions.dart';
+import 'package:bin_app/core/network/api_provider.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/network/endpoints.dart';
 import '../model/bin_model.dart';
 
 abstract class BinDataSource {
@@ -12,6 +17,7 @@ abstract class BinDataSource {
 
 @Injectable(as: BinDataSource)
 class BinDataSourceImpl implements BinDataSource {
+  ApiService api = ApiService();
   @override
   Future<String> addBin(Map<String, dynamic> binData) async {
     // TODO: implement addBin
@@ -26,8 +32,19 @@ class BinDataSourceImpl implements BinDataSource {
 
   @override
   Future<BinModel> getBins() async {
-    // TODO: implement getBins
-    throw UnimplementedError();
+    log('Fetching bins from remote data source');
+    final url = Endpoints.getBins;
+    try {
+      final response = await api.get(url);
+      final finalResponse = BinModel.fromJson(response.data);
+      return finalResponse;
+    } catch (e) {
+      if (e is ClientException || e is ServerException) {
+        rethrow; // Rethrow the specific exceptions
+      } else {
+        throw Exception('Failed to load bins'); // Handle other exceptions
+      }
+    }
   }
 
   @override
@@ -41,7 +58,17 @@ class BinDataSourceImpl implements BinDataSource {
     String binId,
     Map<String, String> colors,
   ) async {
-    // TODO: implement updateBinColor
-    throw UnimplementedError();
+    String url = "${Endpoints.updateBinColor}/$binId/appearance";
+    try {
+      final response = await api.put(url, colors);
+      log('request made');
+      return response.data['message']??"Colors are updated";
+    } catch (e) {
+      if (e is ClientException || e is ServerException) {
+        rethrow; // Rethrow the specific exceptions
+      } else {
+        throw 'Something went wrong'; // Handle other exceptions
+      }
+    }
   }
 }

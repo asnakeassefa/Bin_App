@@ -1,30 +1,32 @@
-import 'package:bin_app/features/bin/presentation/bloc/bin_bloc.dart';
-import 'package:bin_app/features/bin/presentation/bloc/bin_state.dart';
+import 'package:bin_app/core/widgets/custom_button.dart';
 import 'package:bin_app/features/bin/presentation/widgets/detail_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../../../core/di/injection.dart';
+import '../../../../core/utility/date_formater.dart';
 import '../../../../core/utility/svg_generator.dart';
+import '../../data/model/bin_model.dart';
+import 'edit_bin.dart';
 
 class BinImage extends StatelessWidget {
-  final String binColor;
-  final String lidColor;
-  final String title;
+  final Data data;
+  final List<String> colors;
+  final String? binId;
+  final Function() onColorChange;
   const BinImage({
     super.key,
-    required this.binColor,
-    required this.lidColor,
-    required this.title,
+    required this.data,
+    required this.colors,
+    required this.binId,
+    required this.onColorChange,
   });
   @override
   Widget build(BuildContext context) {
-    final binShades = generateShades(binColor);
-    final lidShades = generateShades(lidColor);
+    final binShades = generateShades(data.bodyColor ?? '#808080');
+    final lidShades = generateShades(data.headColor ?? '#808080');
     String svgContent = generateSvg(
-      binColor,
-      lidColor,
+      data.bodyColor ?? '#808080',
+      data.headColor ?? '#808080',
       lidShades[0],
       lidShades[1],
       binShades[2],
@@ -35,11 +37,6 @@ class BinImage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               // make it gradient and to be transparent
-              gradient: LinearGradient(
-                colors: [Colors.white.withOpacity(0.8)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
               borderRadius: BorderRadius.circular(16),
             ),
             height: 320,
@@ -53,84 +50,61 @@ class BinImage extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                   ),
                 ),
+                Positioned(
+                  top: 220,
+                  left: MediaQuery.sizeOf(context).width * 0.4,
+                  child: Text(
+                    (data.binType ?? 'Bin').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w100,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-          ),
+
           DetailCard(
             title: 'Last Collection',
-            subtitle: binColor,
+            subtitle: formatDate(data.lastCollectionDate ?? "") ?? 'N/A',
             shade: Colors.green.withOpacity(.1),
+            onPress: () {
+              editBinBottomSheet(context);
+            },
           ),
           DetailCard(
             title: 'Next Collection',
-            subtitle: lidColor,
+            subtitle: formatDate(data.nextCollectionDate ?? ""),
             shade: Colors.green.withOpacity(.1),
+            onPress: () {
+              editBinBottomSheet(context);
+            },
+          ),
+          CustomButton(
+            onPressed: () {
+              if (binId != null) {
+                editBinsColorBottomSheet(
+                  context,
+                  data.bodyColor ?? '#808080',
+                  data.headColor ?? '#808080',
+                  binId ?? "",
+                  colors,
+                ).then((value) {
+                  if (value == true) {
+                    onColorChange!();
+                  }
+                });
+              } else {}
+            },
+            text: "Pick color",
+            isLoading: false,
+            height: 54,
+            width: MediaQuery.sizeOf(context).width * .9,
           ),
         ],
       ),
     );
   }
-}
-// 
-Future<dynamic> changePasswordBottomSheet(BuildContext context) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) => BlocProvider(
-      create: (context) => getIt<BinBloc>(),
-      child: Container(
-        padding: EdgeInsets.only(top: 10, left: 24, right: 24),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-        height: MediaQuery.sizeOf(context).height * 0.6,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(
-              context,
-            ).viewInsets.bottom, // Adjust for keyboard
-          ),
-          child: BlocConsumer<BinBloc, BinState>(
-            listener: (context, state) {},
-            builder: (context, state) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(2),
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      width: 50,
-                      height: 5,
-                    ),
-                    SizedBox(height: 24),
-                    Text(
-                      'Change Password',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 24),
-
-                    SizedBox(height: 24),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    ),
-  );
 }
