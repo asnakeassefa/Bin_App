@@ -20,8 +20,17 @@ class BinDataSourceImpl implements BinDataSource {
   ApiService api = ApiService();
   @override
   Future<String> addBin(Map<String, dynamic> binData) async {
-    // TODO: implement addBin
-    throw UnimplementedError();
+    final url = Endpoints.addBin;
+    try {
+      final response = await api.post(url, binData);
+      return response.data['message'] ?? "Bin is added";
+    } catch (e) {
+      if (e is ClientException || e is ServerException) {
+        rethrow; // Rethrow the specific exceptions
+      } else {
+        throw Exception('Failed to add bin'); // Handle other exceptions
+      }
+    }
   }
 
   @override
@@ -49,8 +58,18 @@ class BinDataSourceImpl implements BinDataSource {
 
   @override
   Future<String> updateBin(String binId, Map<String, dynamic> binData) async {
-    // TODO: implement updateBin
-    throw UnimplementedError();
+    String url = "${Endpoints.updateBin}/$binId/schedule";
+    try {
+      final response = await api.put(url, binData);
+      log('request made');
+      return response.data['message'] ?? "Bin is updated";
+    } catch (e) {
+      if (e is ClientException || e is ServerException) {
+        rethrow; // Rethrow the specific exceptions
+      } else {
+        throw 'Something went wrong'; // Handle other exceptions
+      }
+    }
   }
 
   @override
@@ -58,11 +77,11 @@ class BinDataSourceImpl implements BinDataSource {
     String binId,
     Map<String, String> colors,
   ) async {
-    String url = "${Endpoints.updateBinColor}/$binId/appearance";
+    String url = "${Endpoints.updateBin}/$binId/appearance";
     try {
       final response = await api.put(url, colors);
       log('request made');
-      return response.data['message']??"Colors are updated";
+      return response.data['message'] ?? "Colors are updated";
     } catch (e) {
       if (e is ClientException || e is ServerException) {
         rethrow; // Rethrow the specific exceptions

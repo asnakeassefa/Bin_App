@@ -20,6 +20,9 @@ class AuthFailure extends AuthState {
 
 class OtpSuccess extends AuthState {}
 
-class GoogleAuthLoading extends AuthState {}
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+  ResetPasswordSuccess({required this.message});
+}
 
 class AuthLogout extends AuthState {}

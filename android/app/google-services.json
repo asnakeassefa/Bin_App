@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "127730135512",
-    "project_id": "binm8-56751",
-    "storage_bucket": "binm8-56751.firebasestorage.app"
+    "project_number": "929883976031",
+    "project_id": "binm8-51877",
+    "storage_bucket": "binm8-51877.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:127730135512:android:e4905fec969a400d2182ad",
+        "mobilesdk_app_id": "1:929883976031:android:a74e8949ad4a52f3a546ea",
         "android_client_info": {
           "package_name": "com.bin.app.bin_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDaA_4Oytilc2wOZYfgeb_KrNALZExfYv0"
+          "current_key": "AIzaSyDYKXyh5nZFoPo05ox0GVfC9xmN9QllNwA"
         }
       ],
       "services": {

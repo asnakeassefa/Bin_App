@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bin_app/features/bin/domain/bin_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -15,7 +17,6 @@ class BinBloc extends Cubit<BinState> {
     try {
       final message = await repository.addBin(binData);
       emit(BinAdded(message));
-      getBins(); // Refresh the list after adding a bin
     } catch (e) {
       emit(BinError(e.toString()));
     }
@@ -23,11 +24,11 @@ class BinBloc extends Cubit<BinState> {
 
   // update
   void updateBinSchedule(String binId, Map<String, dynamic> binData) async {
+    log('Updating bin schedule for binId: $binId with data: $binData');
     emit(BinLoading());
     try {
       final message = await repository.updateBin(binId, binData);
       emit(BinUpdated(message));
-      getBins(); // Refresh the list after updating a bin
     } catch (e) {
       emit(BinError(e.toString()));
     }

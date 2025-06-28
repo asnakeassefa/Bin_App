@@ -10,15 +10,19 @@ import 'edit_bin.dart';
 
 class BinImage extends StatelessWidget {
   final Data data;
+  final String binType;
+  final String binName;
   final List<String> colors;
   final String? binId;
-  final Function() onColorChange;
+  final Function() onChange;
   const BinImage({
     super.key,
     required this.data,
     required this.colors,
     required this.binId,
-    required this.onColorChange,
+    required this.onChange,
+    required this.binType,
+    required this.binName,
   });
   @override
   Widget build(BuildContext context) {
@@ -50,15 +54,19 @@ class BinImage extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                   ),
                 ),
+                // Center the text horizontally to the bin SVG
                 Positioned(
                   top: 220,
-                  left: MediaQuery.sizeOf(context).width * 0.4,
-                  child: Text(
-                    (data.binType ?? 'Bin').toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Text(
+                      (binType).toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -70,39 +78,77 @@ class BinImage extends StatelessWidget {
             title: 'Last Collection',
             subtitle: formatDate(data.lastCollectionDate ?? "") ?? 'N/A',
             shade: Colors.green.withOpacity(.1),
-            onPress: () {
-              editBinBottomSheet(context);
-            },
+            onPress: () {},
           ),
           DetailCard(
             title: 'Next Collection',
             subtitle: formatDate(data.nextCollectionDate ?? ""),
             shade: Colors.green.withOpacity(.1),
-            onPress: () {
-              editBinBottomSheet(context);
-            },
+            onPress: () {},
           ),
-          CustomButton(
-            onPressed: () {
-              if (binId != null) {
-                editBinsColorBottomSheet(
+          // update the schedule
+          if (binId != null)
+            Column(
+              children: [
+                CustomButton(
+                  onPressed: () {
+                    editBinScheduleBottomSheet(context, binId.toString()).then((
+                      value,
+                    ) {
+                      if (value == true) {
+                        onChange();
+                      }
+                    });
+                  },
+                  text: "Update Schedule",
+                  isLoading: false,
+                  height: 54,
+                  width: MediaQuery.sizeOf(context).width * .9,
+                ),
+
+                CustomButton(
+                  onPressed: () {
+                    if (binId != null) {
+                      editBinsColorBottomSheet(
+                        context,
+                        data.bodyColor ?? '#808080',
+                        data.headColor ?? '#808080',
+                        binId ?? "",
+                        colors,
+                      ).then((value) {
+                        if (value == true) {
+                          onChange();
+                        }
+                      });
+                    } else {}
+                  },
+                  text: "Update bin color",
+                  isLoading: false,
+                  height: 54,
+                  width: MediaQuery.sizeOf(context).width * .9,
+                ),
+              ],
+            ),
+          if (binId == null)
+            CustomButton(
+              onPressed: () {
+                addBinDetailBottomSheet(
                   context,
-                  data.bodyColor ?? '#808080',
-                  data.headColor ?? '#808080',
-                  binId ?? "",
+                  '#808080',
+                  '#808080',
+                  binName,
                   colors,
                 ).then((value) {
                   if (value == true) {
-                    onColorChange!();
+                    onChange();
                   }
                 });
-              } else {}
-            },
-            text: "Pick color",
-            isLoading: false,
-            height: 54,
-            width: MediaQuery.sizeOf(context).width * .9,
-          ),
+              },
+              text: "Add Bin Details",
+              isLoading: false,
+              height: 54,
+              width: MediaQuery.sizeOf(context).width * .9,
+            ),
         ],
       ),
     );

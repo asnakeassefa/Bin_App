@@ -37,13 +37,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String> resetPassword(String newPassword) {
-    // TODO: implement resetPassword
-    throw UnimplementedError();
+  Future<String> resetPassword(Map<String, dynamic> newData) async {
+    return await remoteDataSource.resetPassword(newData);
   }
 
   @override
   Future<String> resendOtp(String email) async {
     return await remoteDataSource.resendOtp(email);
+  }
+
+  @override
+  Future<String> resendResetOtp(String email) async {
+    log("Resending reset OTP for email: $email");
+    return await remoteDataSource.resendResetOtp(email);
   }
 }

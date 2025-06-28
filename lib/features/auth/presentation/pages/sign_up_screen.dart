@@ -58,13 +58,19 @@ class SignUpScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 60),
-                        SizedBox(
-                          height: 98,
-                          width: 136,
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            fit: BoxFit.cover,
+                        SizedBox(height: 30),
+                        CircleAvatar(
+                          radius: 85,
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.white,
+                            child: SizedBox(
+                              height: 100,
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(height: 32),

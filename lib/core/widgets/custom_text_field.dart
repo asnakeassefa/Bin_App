@@ -70,13 +70,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ),
               contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               border: Theme.of(context).inputDecorationTheme.border,
-              enabledBorder:
-                  Theme.of(context).inputDecorationTheme.enabledBorder,
+              enabledBorder: Theme.of(
+                context,
+              ).inputDecorationTheme.enabledBorder,
+              errorBorder: Theme.of(context).inputDecorationTheme.errorBorder,
+              
               suffixIcon: widget.isObscure
                   ? IconButton(
-                      icon: Icon(_obscureText
-                          ? Icons.visibility
-                          : Icons.visibility_off),
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                      ),
                       onPressed: () {
                         setState(() {
                           _obscureText = !_obscureText;
@@ -85,7 +88,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     )
                   : null,
             ),
-          )
+          ),
         ],
       ),
     );

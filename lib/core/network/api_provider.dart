@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:bin_app/core/error/exceptions.dart';
+import 'package:bin_app/features/auth/presentation/pages/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -47,7 +48,30 @@ class ApiService {
           handler.next(response); // Continue the response
         },
         onError: (DioException error, handler) async {
-          if (error.response?.statusCode == 401) {
+          log(
+            'Error occurred: ${error.response?.statusCode} - ${error.response?.data['message']}',
+          );
+          if (error.response?.statusCode == 401 &&
+              (error.response?.data['message'] ?? "") ==
+                  'Invalid refresh token') {
+            log('Invalid refresh token, redirecting to login');
+            if (navigatorKey.currentState != null) {
+              navigatorKey.currentState!.pushNamedAndRemoveUntil(
+                LoginScreen.routeName,
+                (route) => false,
+              );
+              return;
+            } else {
+              log(
+                'Navigator key currentState is null, cannot redirect to login.',
+              );
+            }
+            handler.next(error);
+            log('Redirected to login screen due to invalid refresh token');
+          }
+          if (error.response?.statusCode == 401 &&
+              (error.response?.data['message'] == 'Invalid token' ||
+                  error.response?.data['message'] == 'Token has expired')) {
             try {
               await _refreshAccessToken();
               // Retry the failed request with the new token
@@ -88,6 +112,11 @@ class ApiService {
       final refreshToken = await _secureStorage.read(key: 'refreshToken');
       if (refreshToken == null) {
         // throw RefreshTokenExpiredException();
+        navigatorKey.currentState!.pushNamedAndRemoveUntil(
+          LoginScreen.routeName,
+          (route) => false,
+        );
+        throw 'Token has expired';
       }
 
       final response = await _dio.post(
@@ -96,15 +125,21 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final newAccessToken = response.data["accessToken"];
+        final newAccessToken = response.data["data"]["tokens"]["accessToken"];
         await _secureStorage.write(key: 'accessToken', value: newAccessToken);
       } else {
-        // navigatorKey.currentState!
-        //     .pushNamedAndRemoveUntil(LoginPage.routeName, (route) => false);
+        navigatorKey.currentState!.pushNamedAndRemoveUntil(
+          LoginScreen.routeName,
+          (route) => false,
+        );
         // throw RefreshTokenExpiredException();
       }
     } catch (e) {
-      throw Exception();
+      log('Error refreshing access token: $e');
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+        LoginScreen.routeName,
+        (route) => false,
+      );
     }
   }
 

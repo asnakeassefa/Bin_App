@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:bin_app/features/auth/presentation/pages/login_screen.dart';
 import 'package:bin_app/features/bin/presentation/pages/bin_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +20,9 @@ import '../bloc/auth_bloc.dart';
 
 class OtpPage extends StatefulWidget {
   static const routeName = "/otp_page";
-
   final String email;
-  const OtpPage({super.key, required this.email});
+  final String? password;
+  const OtpPage({super.key, required this.email, this.password});
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -50,11 +51,28 @@ class _OtpPageState extends State<OtpPage> {
         body: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is OtpSuccess) {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                BinPage.routeName,
-                (route) => false,
-              );
+              if (widget.password != null) {
+                log('Password reset successfully');
+                // show snackbar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Text('Password reset successfully'),
+                  ),
+                );
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  LoginScreen.routeName,
+                  (route) => false,
+                );
+              } else {
+                log('OTP verified successfully');
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  BinPage.routeName,
+                  (route) => false,
+                );
+              }
             }
 
             if (state is AuthFailure) {
@@ -81,7 +99,20 @@ class _OtpPageState extends State<OtpPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(height: 20),
-                          SvgPicture.asset('assets/images/logo.svg'),
+                          CircleAvatar(
+                            radius: 85,
+                            child: CircleAvatar(
+                              radius: 80,
+                              backgroundColor: Colors.white,
+                              child: SizedBox(
+                                height: 100,
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
                           Center(
                             child: Text(
                               'Enter OTP',
@@ -92,7 +123,7 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                           Center(
                             child: Text(
-                              'Enter the OTP sent to your phone number',
+                              'Enter the OTP sent to your email',
                               style: CustomTypography.bodyLarge.copyWith(
                                 color: Theme.of(context).primaryColor,
                               ),
@@ -150,10 +181,18 @@ class _OtpPageState extends State<OtpPage> {
 
                       CustomButton(
                         onPressed: () {
-                          context.read<AuthCubit>().verifyOtp({
-                            "email": widget.email,
-                            "code": otpController.text,
-                          });
+                          if (widget.password != null) {
+                            context.read<AuthCubit>().resetPassword({
+                              "newPassword": widget.password ?? "",
+                              "code": otpController.text,
+                              "email": widget.email,
+                            });
+                          } else {
+                            context.read<AuthCubit>().verifyOtp({
+                              "email": widget.email,
+                              "code": otpController.text,
+                            });
+                          }
                         },
                         text: "Verify",
                         isLoading: state is AuthLoading,
@@ -170,6 +209,7 @@ class _OtpPageState extends State<OtpPage> {
                                 log(widget.email);
                                 context.read<AuthCubit>().resendOTP(
                                   widget.email,
+                                  widget.password != null,
                                 );
                                 setState(() {
                                   isResendActive = false;

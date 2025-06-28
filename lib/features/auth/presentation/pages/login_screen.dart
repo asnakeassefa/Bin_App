@@ -64,18 +64,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 60),
-                        Container(
-                          height: 120,
-                          child: Theme.of(context).brightness == Brightness.dark
-                              ? Image.asset(
-                                  'assets/images/logo.png',
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.asset(
-                                  'assets/images/logo.png',
-                                  fit: BoxFit.cover,
-                                ),
+                        SizedBox(height: 30),
+                        CircleAvatar(
+                          radius: 85,
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.white,
+                            child: SizedBox(
+                              height: 100,
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(height: 16),
                         Center(
@@ -91,11 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Center(
                           child: Text(
-                            'NEVER MISS A SCHEDULE AGAIN!',
+                            '''NEVER MISS\nA SCHEDULE AGAIN!''',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w100,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w200,
+                              fontFamily: 'inter',
                               color: Theme.of(context).colorScheme.primary,
                             ),
                           ),

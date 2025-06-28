@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:bin_app/features/setting/presentation/bloc/setting_cubit.dart';
+import 'package:bin_app/features/setting/presentation/bloc/setting_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,8 +14,6 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/pages/login_screen.dart';
-import '../bloc/profile_cubit/profile_cubit.dart';
-import '../bloc/profile_cubit/profile_state.dart';
 import '../widgets/account_widget.dart';
 import '../widgets/option.dart'; // Import your login screen
 
@@ -39,15 +39,34 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Future<void> _clearUserData() async {
-    // Clear any user data you may have stored (e.g., tokens, user info)
-    await FlutterSecureStorage().delete(
-      key: 'accessToken',
-    ); // Example for using secure storage, adjust as needed
+    // clear all and add only onboarding true
+    await FlutterSecureStorage().deleteAll();
+    // You can also clear other data if needed
+    log('User data cleared');
+    // now onboarding to local storage
+    await FlutterSecureStorage().write(
+      key: 'onboarding',
+      value: 'true',
+    ); // Example for setting onboarding status
   }
 
+  // init the name from local then update it with the profile data
   bool isOpenToWork = true;
   String profilePicture = 'https://cdn.pixabay.com/photo';
   String name = '';
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the initial profile data
+    final storage = FlutterSecureStorage();
+    storage.read(key: 'fullName').then((value) {
+      if (value != null) {
+        setState(() {
+          name = value;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,136 +79,132 @@ class _SettingPageState extends State<SettingPage> {
         ),
         automaticallyImplyLeading: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              // Name
-              Center(
-                child: Text(
-                  "USER NAME",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+      body: BlocProvider(
+        create: (context) => getIt<SettingCubit>()..getProfile(),
+        child: BlocListener<SettingCubit, SettingState>(
+          listener: (context, state) {
+            if (state is ProfileLoaded) {
+              // add the name to local and update the name
+
+              if (state.profile.data?.fullName != null) {
+                setState(() {
+                  name = state.profile.data?.fullName ?? '';
+                });
+                // Save the name to local storage
+                FlutterSecureStorage().write(
+                  key: 'fullName',
+                  value: state.profile.data?.fullName ?? '',
+                );
+              }
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 16),
+                  // add uk flag here
+                  Center(child: Text("🇬🇧", style: TextStyle(fontSize: 50))),
+                  // Name
+                  Center(
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Account',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 8),
-                child: Column(
-                  children: [
-                    SettingContent(
-                      text: "Update Profile",
-                      onPressed: () {
-                        log('Update Profile pressed');
-                        changePasswordBottomSheet(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 8),
-                child: Column(
-                  children: [
-                    SettingContent(
-                      text: "Change Password",
-                      onPressed: () {
-                        log('Change Password pressed');
-                        changePasswordBottomSheet(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
 
-              Text(
-                'Legal & Privacy',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 16),
+                  SizedBox(height: 8),
+                  Text(
+                    'Account',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16, right: 8),
+                    child: Column(
+                      children: [
+                        SettingContent(
+                          text: "Update Profile",
+                          onPressed: () {
+                            log('Update Profile pressed');
+                            // changePasswordBottomSheet(context);s
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16, right: 8),
+                    child: Column(
+                      children: [
+                        SettingContent(
+                          text: "Change Password",
+                          onPressed: () {
+                            log('Change Password pressed');
+                            changePasswordBottomSheet(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
 
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 8),
-                child: Column(
-                  children: [
-                    SettingLegalContent(
-                      text: "Privacy Policy",
-                      iconPath: Ionicons.shield_checkmark_outline,
+                  Text(
+                    'Legal & Privacy',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                    SettingLegalContent(
-                      text: "Terms of Service",
-                      iconPath: Ionicons.book_outline,
-                    ),
-                    SettingLegalContent(
-                      text: "App Version",
-                      iconPath: Ionicons.code_outline,
-                      version: "1.0.0",
-                    ),
-                  ],
-                ),
-              ),
-              // SizedBox(height: 16),
-              // Text(
-              //   'Help & Support',
-              //   style: TextStyle(
-              //     color: Theme.of(context).colorScheme.primary,
-              //     fontSize: 16,
-              //     fontWeight: FontWeight.w600,
-              //   ),
-              // ),
-              // SizedBox(height: 16),
-              // Padding(
-              //   padding: EdgeInsets.only(left: 16, right: 8),
-              //   child: Column(
-              //     children: [
-              //       SettingLegalContent(
-              //         text: "FAQ",
-              //         iconPath: Ionicons.help_circle_outline,
-              //       ),
-              //       SettingLegalContent(
-              //         text: "Contact & Support",
-              //         iconPath: Ionicons.mail_outline,
-              //       ),
-              //       SettingLegalContent(
-              //         text: "Report Problem",
-              //         iconPath: Ionicons.warning_outline,
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              SizedBox(height: 16),
-              CustomButton(
-                onPressed: () {
-                  _logout(context);
-                },
-                text: " Logout",
-                isLoading: false,
-                height: 56,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.red,
-                imageName: 'assets/icons/logout.svg',
-              ),
+                  ),
+                  SizedBox(height: 16),
 
-              SizedBox(height: 100),
-            ],
+                  Padding(
+                    padding: EdgeInsets.only(left: 16, right: 8),
+                    child: Column(
+                      children: [
+                        SettingLegalContent(
+                          text: "Privacy Policy",
+                          iconPath: Ionicons.shield_checkmark_outline,
+                        ),
+                        SettingLegalContent(
+                          text: "Terms of Service",
+                          iconPath: Ionicons.book_outline,
+                        ),
+                        SettingLegalContent(
+                          text: "App Version",
+                          iconPath: Ionicons.code_outline,
+                          version: "1.0.0",
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+                  CustomButton(
+                    onPressed: () {
+                      _logout(context);
+                    },
+                    text: " Logout",
+                    isLoading: false,
+                    height: 56,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.red,
+                    imageName: 'assets/icons/logout.svg',
+                  ),
+
+                  SizedBox(height: 100),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -202,11 +217,13 @@ class _SettingPageState extends State<SettingPage> {
     TextEditingController newPasswordController = TextEditingController();
 
     TextEditingController confirmPasswordController = TextEditingController();
+    // form key
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => BlocProvider(
-        create: (context) => getIt<AuthCubit>(),
+        create: (context) => getIt<SettingCubit>(),
         child: Container(
           padding: EdgeInsets.only(top: 10, left: 24, right: 24),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
@@ -217,78 +234,132 @@ class _SettingPageState extends State<SettingPage> {
                 context,
               ).viewInsets.bottom, // Adjust for keyboard
             ),
-            child: BlocConsumer<AuthCubit, AuthState>(
+            child: BlocConsumer<SettingCubit, SettingState>(
               listener: (context, state) {
-                if (state is AuthSuccess) {
-                  Navigator.pop(context);
-                }
-
-                if (state is AuthFailure) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
-                  Navigator.pop(context);
+                if (state is SettingError) {
+                  Navigator.pop(context,false);
                 }
               },
               builder: (context, state) {
+                if(state is PasswordChanged){
+                  // return success message
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Ionicons.checkmark_circle,
+                          color: Colors.green,
+                          size: 80,
+                        ),
+                        SizedBox(height: 24),
+                        Text(
+                          'Password changed successfully!',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 24),
+                        CustomButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          isLoading: false,
+                          text: "Close",
+                          height: 48,
+                          width: MediaQuery.sizeOf(context).width * 0.6,
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(2),
-                          color: Theme.of(context).colorScheme.secondary,
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          width: 50,
+                          height: 5,
                         ),
-                        width: 50,
-                        height: 5,
-                      ),
-                      SizedBox(height: 24),
-                      Text(
-                        'Change Password',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        SizedBox(height: 24),
+                        Text(
+                          'Change Password',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 24),
-                      CustomTextField(
-                        isObscure: false,
-                        headerText: "Old password",
-                        hintText: "*************",
-                        controller: oldPasswordController,
-                        validator: null,
-                      ),
-                      CustomTextField(
-                        isObscure: false,
-                        headerText: "New password",
-                        hintText: "*************",
-                        controller: newPasswordController,
-                        validator: null,
-                      ),
-                      CustomTextField(
-                        isObscure: false,
-                        headerText: "Confirm password",
-                        hintText: "*************",
-                        controller: confirmPasswordController,
-                        validator: null,
-                      ),
-                      SizedBox(height: 24),
-                      CustomButton(
-                        onPressed: () {
-                          context.read<AuthCubit>().changePassword(
-                            oldPasswordController.text,
-                            newPasswordController.text,
-                          );
-                        },
-                        text: "Save",
-                        isLoading: state is AuthLoading,
-                        height: 56,
-                        width: MediaQuery.sizeOf(context).width,
-                      ),
-                      SizedBox(height: 24),
-                    ],
+                        SizedBox(height: 24),
+                        CustomTextField(
+                          isObscure: true,
+                          headerText: "Old password",
+                          hintText: "*************",
+                          
+                          controller: oldPasswordController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your old password';
+                            }
+                            return null;
+                          },
+                        ),
+                        CustomTextField(
+                          isObscure: true,
+                          headerText: "New password",
+                          hintText: "*************",
+                          controller: newPasswordController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a new password';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        CustomTextField(
+                          isObscure: true,
+                          headerText: "Confirm password",
+                          hintText: "*************",
+                          controller: confirmPasswordController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (value != newPasswordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 24),
+                        CustomButton(
+                          onPressed: () {
+                            context.read<SettingCubit>().changePassword(
+                              oldPasswordController.text,
+                              newPasswordController.text,
+                            );
+                          },
+                          text: "Save",
+                          isLoading: state is PasswordChangeLoading,
+                          height: 56,
+                          width: MediaQuery.sizeOf(context).width,
+                        ),
+                        SizedBox(height: 24),
+                      ],
+                    ),
                   ),
                 );
               },

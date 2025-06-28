@@ -51,19 +51,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDaA_4Oytilc2wOZYfgeb_KrNALZExfYv0',
-    appId: '1:127730135512:android:e4905fec969a400d2182ad',
-    messagingSenderId: '127730135512',
-    projectId: 'binm8-56751',
-    storageBucket: 'binm8-56751.firebasestorage.app',
+    apiKey: 'AIzaSyDYKXyh5nZFoPo05ox0GVfC9xmN9QllNwA',
+    appId: '1:929883976031:android:a74e8949ad4a52f3a546ea',
+    messagingSenderId: '929883976031',
+    projectId: 'binm8-51877',
+    storageBucket: 'binm8-51877.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDSj1SUi8Gd6OeG344ZDF4vbM59Dz1OD9k',
-    appId: '1:127730135512:ios:37c478c0ca8d8a3a2182ad',
-    messagingSenderId: '127730135512',
-    projectId: 'binm8-56751',
-    storageBucket: 'binm8-56751.firebasestorage.app',
+    apiKey: 'AIzaSyBCxBN17YuoCI6ZpybAFFFosKP4GJR00Bs',
+    appId: '1:929883976031:ios:b20d7b708f18fadca546ea',
+    messagingSenderId: '929883976031',
+    projectId: 'binm8-51877',
+    storageBucket: 'binm8-51877.firebasestorage.app',
     iosBundleId: 'com.bin.app.binApp',
   );
 

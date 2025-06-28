@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bin_app/core/utility/date_formater.dart';
 import 'package:bin_app/features/bin/data/model/bin_model.dart';
 import 'package:bin_app/features/bin/presentation/bloc/bin_bloc.dart';
 import 'package:bin_app/features/bin/presentation/bloc/bin_state.dart';
@@ -87,6 +88,27 @@ class _BinPageState extends State<BinPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // add a title that is today's date
+        title: Column(
+          children: [
+            Text(
+              'Today',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              formatDate(DateTime.now().toString()),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(
@@ -147,26 +169,32 @@ class _BinPageState extends State<BinPage> {
                         BinImage(
                           data: binData,
                           colors: binColors,
-                          binId: binId ?? "0",
-                          onColorChange: () {
+                          binId: binId,
+                          binType: "Bin",
+                          binName: "general",
+                          onChange: () {
                             context.read<BinBloc>().getBins();
                           },
                         ),
                         // recycle bin
                         BinImage(
                           data: recycleBinData,
-                          binId: recycleBinId ?? "0",
+                          binId: recycleBinId,
+                          binType: "Recycle",
+                          binName: "recycle",
                           colors: recycleBinColors,
-                          onColorChange: () {
+                          onChange: () {
                             context.read<BinBloc>().getBins();
                           },
                         ),
                         // garden bin
                         BinImage(
                           data: gardenBinData,
-                          binId: generalBinId ?? "0",
+                          binId: generalBinId,
+                          binType: "Garden",
+                          binName: "garden",
                           colors: gardenBinColors,
-                          onColorChange: () {
+                          onChange: () {
                             context.read<BinBloc>().getBins();
                           },
                         ),

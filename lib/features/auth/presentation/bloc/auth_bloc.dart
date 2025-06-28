@@ -29,8 +29,6 @@ class AuthCubit extends Cubit<AuthState> {
       // add device token to user data if needed
       final deviceToken = await FirebaseService()
           .getToken(); // Replace with actual device token logic
-
-      log('Device Token: $deviceToken');
       user['deviceToken'] = deviceToken;
       String res = await repository.register(user);
       if (res.isNotEmpty) {
@@ -46,17 +44,32 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> verifyOtp(Map<String, String> otpData) async {
     emit(AuthLoading());
     try {
-      String response = await repository.verifiyOtp(otpData);
-      emit(AuthSuccess(message: response));
+      await repository.verifiyOtp(otpData);
+      emit(OtpSuccess());
     } catch (err) {
       emit(AuthFailure(message: err.toString()));
     }
   }
 
-  Future<void> resendOTP(String email) async {
+  Future<void> resetPassword(Map<String, String> otpData) async {
     emit(AuthLoading());
     try {
-      String response = await repository.resendOtp(email);
+      await repository.resetPassword(otpData);
+      emit(OtpSuccess());
+    } catch (err) {
+      emit(AuthFailure(message: err.toString()));
+    }
+  }
+
+  Future<void> resendOTP(String email, bool isReset) async {
+    emit(AuthLoading());
+    try {
+      String response;
+      if (isReset) {
+        response = await repository.resendResetOtp(email);
+      } else {
+        response = await repository.resendOtp(email);
+      }
       emit(AuthSuccess(message: response));
     } catch (err) {
       emit(AuthFailure(message: err.toString()));
