@@ -34,4 +34,15 @@ class SettingCubit extends Cubit<SettingState> {
       emit(SettingError(message: e.toString()));
     }
   }
+
+  // update profile
+  Future<void> updateProfile(Map<String, dynamic> data) async {
+    emit(ProfileUpdateLoading());
+    try {
+      final message = await repository.updateProfile(data);
+      emit(ProfileUpdated(message: message));
+    } catch (e) {
+      emit(SettingError(message: e.toString()));
+    }
+  }
 }

@@ -6,7 +6,7 @@ abstract class SettingRepository {
   Future<ProfileModel> getProfile();
 
   // Updates the user profile with the provided data.
-  Future<ProfileModel> updateProfile(Map<String, dynamic> data);
+  Future<String> updateProfile(Map<String, dynamic> data);
 
   // Changes the user's password.
   Future<String> changePassword(String oldPassword, String newPassword);

@@ -9,7 +9,7 @@ abstract class SettingDataSource {
   // Fetches the user profile.
   Future<ProfileModel> getProfile();
   // Updates the user profile with the provided data.
-  Future<ProfileModel> updateProfile(Map<String, dynamic> data);
+  Future<String> updateProfile(Map<String, dynamic> data);
   // Changes the user's password.
   Future<String> changePassword(String oldPassword, String newPassword);
 }
@@ -55,8 +55,18 @@ class SettingRemoteDataSource implements SettingDataSource {
   }
 
   @override
-  Future<ProfileModel> updateProfile(Map<String, dynamic> data) async {
-    // TODO: implement updateProfile
-    throw UnimplementedError();
+  Future<String> updateProfile(Map<String, dynamic> data) async {
+    String url = Endpoints.updateProfile;
+
+    try {
+      await api.put(url, data);
+      return 'Profile updated successfully';
+    } catch (e) {
+      if (e is ClientException || e is ServerException) {
+        rethrow; // Re-throw known exceptions
+      } else {
+        throw 'Something went wrong while updating profile';
+      }
+    }
   }
 }

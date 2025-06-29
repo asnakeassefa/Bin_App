@@ -7,15 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 // import 'package:eskalate_mobile/core/utility/router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/pages/login_screen.dart';
 import '../widgets/account_widget.dart';
-import '../widgets/option.dart'; // Import your login screen
+import '../widgets/change_password.dart';
+import '../widgets/update_profile.dart';
 
 class SettingPage extends StatefulWidget {
   static const String routeName = '/setting';
@@ -54,6 +53,7 @@ class _SettingPageState extends State<SettingPage> {
   bool isOpenToWork = true;
   String profilePicture = 'https://cdn.pixabay.com/photo';
   String name = '';
+  String country = '';
   @override
   void initState() {
     super.initState();
@@ -85,285 +85,144 @@ class _SettingPageState extends State<SettingPage> {
           listener: (context, state) {
             if (state is ProfileLoaded) {
               // add the name to local and update the name
-
+              log('Profile loaded: ${state.profile.data?.fullName}');
               if (state.profile.data?.fullName != null) {
                 setState(() {
                   name = state.profile.data?.fullName ?? '';
+                  country = state.profile.data?.country ?? '';
                 });
                 // Save the name to local storage
                 FlutterSecureStorage().write(
                   key: 'fullName',
                   value: state.profile.data?.fullName ?? '',
                 );
+                FlutterSecureStorage().write(
+                  key: 'country',
+                  value: state.profile.data?.country ?? '',
+                );
               }
             }
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16),
-                  // add uk flag here
-                  Center(child: Text("🇬🇧", style: TextStyle(fontSize: 50))),
-                  // Name
-                  Center(
-                    child: Text(
-                      name,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-                  Text(
-                    'Account',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 16, right: 8),
-                    child: Column(
-                      children: [
-                        SettingContent(
-                          text: "Update Profile",
-                          onPressed: () {
-                            log('Update Profile pressed');
-                            // changePasswordBottomSheet(context);s
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 16, right: 8),
-                    child: Column(
-                      children: [
-                        SettingContent(
-                          text: "Change Password",
-                          onPressed: () {
-                            log('Change Password pressed');
-                            changePasswordBottomSheet(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Text(
-                    'Legal & Privacy',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-
-                  Padding(
-                    padding: EdgeInsets.only(left: 16, right: 8),
-                    child: Column(
-                      children: [
-                        SettingLegalContent(
-                          text: "Privacy Policy",
-                          iconPath: Ionicons.shield_checkmark_outline,
-                        ),
-                        SettingLegalContent(
-                          text: "Terms of Service",
-                          iconPath: Ionicons.book_outline,
-                        ),
-                        SettingLegalContent(
-                          text: "App Version",
-                          iconPath: Ionicons.code_outline,
-                          version: "1.0.0",
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 16),
-                  CustomButton(
-                    onPressed: () {
-                      _logout(context);
-                    },
-                    text: " Logout",
-                    isLoading: false,
-                    height: 56,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.red,
-                    imageName: 'assets/icons/logout.svg',
-                  ),
-
-                  SizedBox(height: 100),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<dynamic> changePasswordBottomSheet(BuildContext context) {
-    TextEditingController oldPasswordController = TextEditingController();
-
-    TextEditingController newPasswordController = TextEditingController();
-
-    TextEditingController confirmPasswordController = TextEditingController();
-    // form key
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => BlocProvider(
-        create: (context) => getIt<SettingCubit>(),
-        child: Container(
-          padding: EdgeInsets.only(top: 10, left: 24, right: 24),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-          height: MediaQuery.sizeOf(context).height * 0.6,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(
-                context,
-              ).viewInsets.bottom, // Adjust for keyboard
-            ),
-            child: BlocConsumer<SettingCubit, SettingState>(
-              listener: (context, state) {
-                if (state is SettingError) {
-                  Navigator.pop(context,false);
-                }
-              },
-              builder: (context, state) {
-                if(state is PasswordChanged){
-                  // return success message
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Ionicons.checkmark_circle,
-                          color: Colors.green,
-                          size: 80,
-                        ),
-                        SizedBox(height: 24),
-                        Text(
-                          'Password changed successfully!',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 24),
-                        CustomButton(
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          isLoading: false,
-                          text: "Close",
-                          height: 48,
-                          width: MediaQuery.sizeOf(context).width * 0.6,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                return SingleChildScrollView(
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                          width: 50,
-                          height: 5,
-                        ),
-                        SizedBox(height: 24),
-                        Text(
-                          'Change Password',
+          child: Builder(
+            builder: (innerContext) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 16),
+                      // add uk flag here
+                      Center(child: Text("🇬🇧", style: TextStyle(fontSize: 50))),
+                      // Name
+                      Center(
+                        child: Text(
+                          name,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 24),
-                        CustomTextField(
-                          isObscure: true,
-                          headerText: "Old password",
-                          hintText: "*************",
-                          
-                          controller: oldPasswordController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your old password';
-                            }
-                            return null;
-                          },
+                      ),
+              
+                      SizedBox(height: 8),
+                      Text(
+                        'Account',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                        CustomTextField(
-                          isObscure: true,
-                          headerText: "New password",
-                          hintText: "*************",
-                          controller: newPasswordController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a new password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 16, right: 8),
+                        child: Column(
+                          children: [
+                            SettingContent(
+                              text: "Update Profile",
+                              onPressed: () {
+                                log('Update Profile pressed');
+                                updateProfileBottomSheet(
+                                  context,
+                                  name,
+                                  country,
+                                ).then((value) {
+                                  log(
+                                    'Update Profile Bottom Sheet closed with value: $value',
+                                  );
+                                  // Fetch the updated profile data
+                                  innerContext.read<SettingCubit>().getProfile();
+                                });
+                              },
+                            ),
+                          ],
                         ),
-                        CustomTextField(
-                          isObscure: true,
-                          headerText: "Confirm password",
-                          hintText: "*************",
-                          controller: confirmPasswordController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please confirm your password';
-                            }
-                            if (value != newPasswordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 16, right: 8),
+                        child: Column(
+                          children: [
+                            SettingContent(
+                              text: "Change Password",
+                              onPressed: () {
+                                changePasswordBottomSheet(context);
+                              },
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 24),
-                        CustomButton(
-                          onPressed: () {
-                            context.read<SettingCubit>().changePassword(
-                              oldPasswordController.text,
-                              newPasswordController.text,
-                            );
-                          },
-                          text: "Save",
-                          isLoading: state is PasswordChangeLoading,
-                          height: 56,
-                          width: MediaQuery.sizeOf(context).width,
+                      ),
+              
+                      Text(
+                        'Legal & Privacy',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                        SizedBox(height: 24),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 16),
+              
+                      Padding(
+                        padding: EdgeInsets.only(left: 16, right: 8),
+                        child: Column(
+                          children: [
+                            SettingLegalContent(
+                              text: "Privacy Policy",
+                              iconPath: Ionicons.shield_checkmark_outline,
+                            ),
+                            SettingLegalContent(
+                              text: "Terms of Service",
+                              iconPath: Ionicons.book_outline,
+                            ),
+                            SettingLegalContent(
+                              text: "App Version",
+                              iconPath: Ionicons.code_outline,
+                              version: "1.0.0",
+                            ),
+                          ],
+                        ),
+                      ),
+              
+                      SizedBox(height: 16),
+                      CustomButton(
+                        onPressed: () {
+                          _logout(context);
+                        },
+                        text: " Logout",
+                        isLoading: false,
+                        height: 56,
+                        width: MediaQuery.of(context).size.width,
+                        color: Colors.red,
+                        imageName: 'assets/icons/logout.svg',
+                      ),
+              
+                      SizedBox(height: 100),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }
           ),
         ),
       ),

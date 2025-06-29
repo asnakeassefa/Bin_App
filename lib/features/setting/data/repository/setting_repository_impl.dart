@@ -19,7 +19,7 @@ class SettingRepositoryImpl implements SettingRepository {
   }
 
   @override
-  Future<ProfileModel> updateProfile(Map<String, dynamic> data) {
+  Future<String> updateProfile(Map<String, dynamic> data) {
     return settingDataSource.updateProfile(data);
   }
 }

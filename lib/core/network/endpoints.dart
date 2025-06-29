@@ -21,8 +21,7 @@ class Endpoints {
   static const String addBin = '$baseUrl/bins/add';
   static const String updateBin = '$baseUrl/bins';
 
-
   // profile
   static const String getProfile = '$baseUrl/users/me';
-
+  static const String updateProfile = '$baseUrl/users/me';
 }

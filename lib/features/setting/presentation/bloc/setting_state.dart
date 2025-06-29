@@ -37,3 +37,12 @@ class PasswordChanged extends SettingState {
 }
 
 class PasswordChangeLoading extends SettingState {}
+
+
+// profile update state
+class ProfileUpdated extends SettingState {
+  final String message;
+  ProfileUpdated({required this.message});
+}
+
+class ProfileUpdateLoading extends SettingState {}
